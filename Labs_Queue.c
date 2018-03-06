@@ -3,8 +3,7 @@
 
 struct BlockDefinition
 {
-    struct BlockDefinition *pxFront;
-    struct BlockDefinition *pxRear;
+    struct BlockDefinition *pxNext;
 
     void *pvStorageData;
 };
@@ -26,10 +25,12 @@ QueueHandle_t Queue_Initialize()
     Queue_t *pxNewQueue = (Queue_t *)&ucaQueueStorageArea;
 
     pxNewQueue->usFreeSize = sizeof(ucaQueueStorageArea) - sizeof(Queue_t);
+
     pxNewQueue->pxBlockUsed = pxNewQueue->pxBlockUnused = (Block_t *)(pxNewQueue + sizeof(Queue_t));
 
-    pxNewQueue->pxBlockUsed->pxFront = NULL;
-    pxNewQueue->pxBlockUsed->pxRear = (Block_t *)(pxNewQueue->pxBlockUsed + sizeof(Block_t));
+    pxNewQueue->pxBlockUsed->pxNext = NULL;
+
+    pxNewQueue->pxBlockUnused->pxNext = (Block_t *)(pxNewQueue->pxBlockUsed + sizeof(Block_t));
 }
 
 void Queue_Enqueue()
