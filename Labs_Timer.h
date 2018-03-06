@@ -2,7 +2,7 @@
 #define __LABS_TIMER_H
 
 #ifndef __LABS_CONFIG_H
-#error "include Labs_Config.h" must appear in source files before "Labs_Timer.h"
+    #error "include Labs_Config.h" must appear in source files before "Labs_Timer.h"
 #endif
 
 #ifdef __cplusplus
