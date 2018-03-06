@@ -1,6 +1,8 @@
 #ifndef __LABS_CONFIG_H
 #define __LABS_CONFIG_H
 
+#define configQUEUE_SIZE        96
+
 /*!< Signed integer types  */
 typedef signed char     int8_t;
 typedef signed short    int16_t;

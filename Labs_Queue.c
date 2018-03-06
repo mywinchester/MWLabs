@@ -14,5 +14,28 @@ struct QueueDefinition
 {
     Block_t *pxBlockUnused;
     Block_t *pxBlockUsed;
+
+    uint16_t usFreeSize;
 };
 typedef struct QueueDefinition Queue_t;
+
+static uint8_t ucaQueueStorageArea[configQUEUE_SIZE];
+
+QueueHandle_t Queue_Initialize()
+{
+    Queue_t *pxNewQueue = (Queue_t *)&ucaQueueStorageArea;
+
+    pxNewQueue->usFreeSize = sizeof(ucaQueueStorageArea) - sizeof(Queue_t);
+    pxNewQueue->pxBlockUsed = pxNewQueue->pxBlockUnused = (Block_t *)(pxNewQueue + sizeof(Queue_t));
+
+    pxNewQueue->pxBlockUsed->pxFront = NULL;
+    pxNewQueue->pxBlockUsed->pxRear = (Block_t *)(pxNewQueue->pxBlockUsed + sizeof(Block_t));
+}
+
+void Queue_Enqueue()
+{
+}
+
+void Queue_Dequeue()
+{
+}
