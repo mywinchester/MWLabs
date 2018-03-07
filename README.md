@@ -1,7 +1,7 @@
 ## MWLabs
 
-[![Build Status](https://img.shields.io/vso/build/larsbrinkhoff/953a34b9-5966-4923-a48a-c41874cfb5f5/1.svg)]
-[![License: GPL v3](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Build Status](https://img.shields.io/vso/build/larsbrinkhoff/953a34b9-5966-4923-a48a-c41874cfb5f5/1.svg)]()
+[![License](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 用 C/C++ 编写的用于8位MCU的开放源代码软件库。
 An open source software libraries for 8-Bit MCUs written in C/C++.
