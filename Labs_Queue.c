@@ -5,6 +5,7 @@ struct BlockDefinition
 {
     struct BlockDefinition *pxNext;
 
+    uint8_t ucIdentity;
     void *pvStorageData;
 };
 typedef struct BlockDefinition Block_t;
@@ -14,24 +15,61 @@ struct QueueDefinition
     Block_t *pxBlockUnused;
     Block_t *pxBlockUsed;
 
-    uint16_t usFreeSize;
+    bool hasInitialize;
+    uint16_t usFreeSizeInByte;
 };
 typedef struct QueueDefinition Queue_t;
 
-static uint8_t ucaQueueStorageArea[configQUEUE_SIZE];
+#if (configQUEUE_MULTI == 1)
+QueueHandle_t xQueue_MultiInitialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize)
+{
+    if (pucQueueStorageArea != NULL && usQueueSize != NULL)
+    {
+        Queue_t *pxNewQueue = (Queue_t *)pucQueueStorageArea;
 
-QueueHandle_t Queue_Initialize()
+        if (pxNewQueue->hasInitialize != FALSE)
+        {
+            if (usQueueSize > sizeof(Queue_t))
+            {
+                pxNewQueue->usFreeSizeInByte = usQueueSize - sizeof(Queue_t);
+
+                pxNewQueue->pxBlockUsed = pxNewQueue->pxBlockUnused = (Block_t *)(pucQueueStorageArea + sizeof(Queue_t));
+
+                pxNewQueue->hasInitialize = (bool)TRUE;
+
+                return (QueueHandle_t)pxNewQueue;
+            }
+        }
+    }
+
+    return (QueueHandle_t)NULL;
+}
+
+#else
+static uint8_t ucaQueueStorageArea[configQUEUE_SIZEINBYTE];
+
+QueueHandle_t xQueue_SingleInitialize(void)
 {
     Queue_t *pxNewQueue = (Queue_t *)&ucaQueueStorageArea;
 
-    pxNewQueue->usFreeSize = sizeof(ucaQueueStorageArea) - sizeof(Queue_t);
+    if (pxNewQueue->hasInitialize != FALSE)
+    {
+        if (sizeof(ucaQueueStorageArea) > sizeof(Queue_t))
+        {
+            pxNewQueue->usFreeSizeInByte = sizeof(ucaQueueStorageArea) - sizeof(Queue_t);
 
-    pxNewQueue->pxBlockUsed = pxNewQueue->pxBlockUnused = (Block_t *)(pxNewQueue + sizeof(Queue_t));
+            pxNewQueue->pxBlockUsed = pxNewQueue->pxBlockUnused = (Block_t *)(&ucaQueueStorageArea + sizeof(Queue_t));
 
-    pxNewQueue->pxBlockUsed->pxNext = NULL;
+            pxNewQueue->hasInitialize = (bool)TRUE;
 
-    pxNewQueue->pxBlockUnused->pxNext = (Block_t *)(pxNewQueue->pxBlockUsed + sizeof(Block_t));
+            return (QueueHandle_t)pxNewQueue;
+        }
+    }
+
+    return (QueueHandle_t)NULL;
 }
+
+#endif /* Multi Queue */
 
 void Queue_Enqueue()
 {

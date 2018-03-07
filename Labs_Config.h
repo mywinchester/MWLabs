@@ -1,7 +1,12 @@
 #ifndef __LABS_CONFIG_H
 #define __LABS_CONFIG_H
 
-#define configQUEUE_SIZE        96
+#define configQUEUE_MULTI           1
+#define configQUEUE_SIZEINBYTE      96
+
+#if (configQUEUE_MULTI == 1)
+#undef configQUEUE_SIZEINBYTE
+#endif /* Multi Queue */
 
 /*!< Signed integer types  */
 typedef signed char     int8_t;
