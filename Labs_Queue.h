@@ -11,7 +11,11 @@ extern "C" {
 
 typedef void * QueueHandle_t;
 
-QueueHandle_t xQueue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize);
+QueueHandle_t Queue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize);
+
+ErrorStatus Queue_Enqueue(QueueHandle_t pxQueue, int8_t ucIdentity, void *pcSrcData, uint16_t usLength);
+
+void *Queue_Dequeue(QueueHandle_t pxQueue, int8_t ucIdentity);
 
 #ifdef __cplusplus
 }

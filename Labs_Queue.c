@@ -5,7 +5,8 @@ struct BlockDefinition
 {
     struct BlockDefinition *pxNext;
 
-    uint8_t ucIdentity;
+    int8_t ucIdentity;
+    uint16_t usLength;
     void *pvStorageData;
 };
 typedef struct BlockDefinition Block_t;
@@ -20,7 +21,7 @@ struct QueueDefinition
 };
 typedef struct QueueDefinition Queue_t;
 
-QueueHandle_t xQueue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize)
+QueueHandle_t Queue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize)
 {
 #if (configQUEUE_MULTI == 1)
     Queue_t *pxNewQueue = (Queue_t *)pucQueueStorageArea;
@@ -65,10 +66,41 @@ QueueHandle_t xQueue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSi
     return (QueueHandle_t)NULL;
 }
 
-void Queue_Enqueue()
+ErrorStatus Queue_Enqueue(QueueHandle_t pxQueue, int8_t ucIdentity, void *pcSrcData, uint16_t usLength)
 {
+#if (configQUEUE_MULTI == 1)
+    if ((pxQueue != NULL) && (usLength != NULL))
+    {
+        Queue_t *pxOperatingQueue = (Queue_t *)pxQueue;
+
+        if (usLength <= pxOperatingQueue->usFreeSizeInByte + sizeof(Block_t))
+        {
+            Block_t *pxNewBlock = pxOperatingQueue->pxBlockUnused;
+
+            char *pcDest = pxNewBlock->pvStorageData;
+            const char *pcSrc = pcSrcData;
+
+            pxNewBlock->ucIdentity = (int8_t)ucIdentity;
+            pxNewBlock->usLength = (uint16_t)usLength;
+
+            while (usLength--)
+            {
+                *pcDest++ = *pcSrc++;
+            }
+        }
+    }
+
+#else
+
+#endif /* Multi Queue */
 }
 
-void Queue_Dequeue()
+void *Queue_Dequeue(QueueHandle_t pxQueue, int8_t ucIdentity)
 {
+#if (configQUEUE_MULTI == 1)
+    Queue_t *pxOperatingQueue = (Queue_t *)pxQueue;
+
+#else
+
+#endif /* Multi Queue */
 }
