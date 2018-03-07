@@ -20,13 +20,13 @@ struct QueueDefinition
 };
 typedef struct QueueDefinition Queue_t;
 
-#if (configQUEUE_MULTI == 1)
-QueueHandle_t xQueue_MultiInitialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize)
+QueueHandle_t xQueue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize)
 {
-    if (pucQueueStorageArea != NULL && usQueueSize != NULL)
-    {
-        Queue_t *pxNewQueue = (Queue_t *)pucQueueStorageArea;
+#if (configQUEUE_MULTI == 1)
+    Queue_t *pxNewQueue = (Queue_t *)pucQueueStorageArea;
 
+    if (pxNewQueue != NULL && usQueueSize != NULL)
+    {
         if (pxNewQueue->hasInitialize != FALSE)
         {
             if (usQueueSize > sizeof(Queue_t))
@@ -42,14 +42,8 @@ QueueHandle_t xQueue_MultiInitialize(uint8_t *pucQueueStorageArea, uint16_t usQu
         }
     }
 
-    return (QueueHandle_t)NULL;
-}
-
 #else
-static uint8_t ucaQueueStorageArea[configQUEUE_SIZEINBYTE];
-
-QueueHandle_t xQueue_SingleInitialize(void)
-{
+    static uint8_t ucaQueueStorageArea[configQUEUE_SIZEINBYTE];
     Queue_t *pxNewQueue = (Queue_t *)&ucaQueueStorageArea;
 
     if (pxNewQueue->hasInitialize != FALSE)
@@ -66,10 +60,10 @@ QueueHandle_t xQueue_SingleInitialize(void)
         }
     }
 
+#endif /* Multi Queue */
+
     return (QueueHandle_t)NULL;
 }
-
-#endif /* Multi Queue */
 
 void Queue_Enqueue()
 {

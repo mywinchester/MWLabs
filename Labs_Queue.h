@@ -11,13 +11,7 @@ extern "C" {
 
 typedef void * QueueHandle_t;
 
-#if (configQUEUE_MULTI == 1)
-#define xQueueCreate(pucQueueStorageArea, usQueueSize) xQueue_MultiInitialize(pucQueueStorageArea, usQueueSize)
-
-#else
-#define xQueueCreate(pucQueueStorageArea, usQueueSize) xQueue_SingleInitialize(void)
-
-#endif /* Multi Queue */
+QueueHandle_t xQueue_Initialize(uint8_t *pucQueueStorageArea, uint16_t usQueueSize);
 
 #ifdef __cplusplus
 }

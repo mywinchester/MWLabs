@@ -1,7 +1,7 @@
 #ifndef __LABS_CONFIG_H
 #define __LABS_CONFIG_H
 
-#define configQUEUE_MULTI           1
+#define configQUEUE_MULTI           0
 #define configQUEUE_SIZEINBYTE      96
 
 #if (configQUEUE_MULTI == 1)
