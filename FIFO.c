@@ -10,8 +10,8 @@
 **/
 struct FIFODefinition
 {
-    void *pxBlockUnused;        /* !< 指向未使用的块的指针 > */
-    void *pxBlockUsed;          /* !< 指向已使用的块的指针 > */
+    char *pxBlockUnused;        /* !< 指向未使用的块的指针 > */
+    char *pxBlockUsed;          /* !< 指向已使用的块的指针 > */
     uint16_t usFreeSizeInByte;  /* !< FIFO队列空闲大小 > */
     uint16_t usTotalSizeInByte; /* !< FIFO队列总大小 > */
 };
@@ -33,7 +33,7 @@ FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, uint16_t usFIFOStorageSize
         pxNewFIFO->usTotalSizeInByte = (uint16_t)usFIFOStorageSize;
         pxNewFIFO->usFreeSizeInByte = (uint16_t)(usFIFOStorageSize - sizeof(FIFO_t));
 
-        pxNewFIFO->pxBlockUsed = pxNewFIFO->pxBlockUnused = (void *)(pxNewFIFO + sizeof(FIFO_t));
+        pxNewFIFO->pxBlockUsed = pxNewFIFO->pxBlockUnused = (char *)((char *)pxNewFIFO + sizeof(FIFO_t));
 
         return (FIFOHandle_t)(pxNewFIFO);
     }
@@ -86,8 +86,8 @@ ErrorStatus FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
     {
         FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
-        void *pxStartLine = (void *)(pxOperatingFIFO + sizeof(FIFO_t));
-        void *pxEndLine = (void *)(pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
+        char *pcStartLine = (char *)((char *)pxOperatingFIFO + sizeof(FIFO_t));
+        char *pcEndLine = (char *)((char *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
         pxOperatingFIFO->usFreeSizeInByte += usSize;
 
@@ -100,9 +100,9 @@ ErrorStatus FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
                 break;
             }
 
-            if (pxOperatingFIFO->pxBlockUsed == pxEndLine)
+            if (pxOperatingFIFO->pxBlockUsed == pcEndLine)
             {
-                pxOperatingFIFO->pxBlockUsed = pxStartLine;
+                pxOperatingFIFO->pxBlockUsed = pcStartLine;
             }
         }
 
@@ -123,20 +123,20 @@ ErrorStatus FIFO_Write(FIFOHandle_t pxFIFO, const void *pvSrc, uint16_t usSize)
     {
         FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
-        void *pxStartLine = (void *)(pxOperatingFIFO + sizeof(FIFO_t));
-        void *pxEndLine = (void *)(pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
-
-        pxOperatingFIFO->usFreeSizeInByte -= usSize;
+        char *pcStartLine = (char *)((char *)pxOperatingFIFO + sizeof(FIFO_t));
+        char *pcEndLine = (char *)((char *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
         if (usSize <= pxOperatingFIFO->usFreeSizeInByte)
         {
+            pxOperatingFIFO->usFreeSizeInByte -= usSize;
+
             while (usSize--)
             {
                 *(((char *)pxOperatingFIFO->pxBlockUnused)++) = *(((char *)pvSrc)++);
 
-                if (pxOperatingFIFO->pxBlockUnused == pxEndLine)
+                if (pxOperatingFIFO->pxBlockUnused == pcEndLine)
                 {
-                    pxOperatingFIFO->pxBlockUnused = pxStartLine;
+                    pxOperatingFIFO->pxBlockUnused = pcStartLine;
                 }
             }
 
