@@ -89,6 +89,8 @@ ErrorStatus FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
         void *pxStartLine = (void *)(pxOperatingFIFO + sizeof(FIFO_t));
         void *pxEndLine = (void *)(pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
+        pxOperatingFIFO->usFreeSizeInByte += usSize;
+
         while (usSize--)
         {
             *(((char *)pvDest)++) = *(((char *)pxOperatingFIFO->pxBlockUsed)++);
@@ -123,6 +125,8 @@ ErrorStatus FIFO_Write(FIFOHandle_t pxFIFO, const void *pvSrc, uint16_t usSize)
 
         void *pxStartLine = (void *)(pxOperatingFIFO + sizeof(FIFO_t));
         void *pxEndLine = (void *)(pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
+
+        pxOperatingFIFO->usFreeSizeInByte -= usSize;
 
         if (usSize <= pxOperatingFIFO->usFreeSizeInByte)
         {
