@@ -86,6 +86,9 @@ uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
     {
         FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
+        char *pcSRC = (char *)pxOperatingFIFO->pxBlockUsed;
+        char *pcDEST = (char *)pvDest;
+
         char *pcStartLine = (char *)((char *)pxOperatingFIFO + sizeof(FIFO_t));
         char *pcEndLine = (char *)((char *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
@@ -95,20 +98,22 @@ uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
 
         while (usSize--)
         {
-            *((char *)pvDest)++ = *((char *)pxOperatingFIFO->pxBlockUsed)++;
+            *pcDEST++ = *pcSRC++;
 
             usReadNumber++;
 
-            if (pxOperatingFIFO->pxBlockUsed == pcEndLine)
+            if (pcSRC == pcEndLine)
             {
-                pxOperatingFIFO->pxBlockUsed = pcStartLine;
+                pcSRC = pcStartLine;
             }
 
-            if (pxOperatingFIFO->pxBlockUsed == pxOperatingFIFO->pxBlockUnused)
+            if (pcSRC == pxOperatingFIFO->pxBlockUnused)
             {
+                pxOperatingFIFO->pxBlockUsed = pcSRC;
                 return (uint16_t)(usReadNumber);
             }
         }
+        pxOperatingFIFO->pxBlockUsed = pcSRC;
 
         return (uint16_t)(usReadNumber);
     }
