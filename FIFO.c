@@ -78,9 +78,9 @@ uint16_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO)
 /**
  * 函数名:      FIFO_Read()
  * 功能:        FIFO队列读取
- * 返回值:      (void *)指向当前块数据的指针
+ * 返回值:      (uint16_t)读取到的数据字节大小
 **/
-ErrorStatus FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
+uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
 {
     if (pxFIFO != NULL)
     {
@@ -89,27 +89,31 @@ ErrorStatus FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
         char *pcStartLine = (char *)((char *)pxOperatingFIFO + sizeof(FIFO_t));
         char *pcEndLine = (char *)((char *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
+        uint16_t usReadNumber = 0;
+
         pxOperatingFIFO->usFreeSizeInByte += usSize;
 
         while (usSize--)
         {
             *(((char *)pvDest)++) = *(((char *)pxOperatingFIFO->pxBlockUsed)++);
 
-            if (pxOperatingFIFO->pxBlockUsed == pxOperatingFIFO->pxBlockUnused)
-            {
-                break;
-            }
+            usReadNumber++;
 
             if (pxOperatingFIFO->pxBlockUsed == pcEndLine)
             {
                 pxOperatingFIFO->pxBlockUsed = pcStartLine;
             }
+
+            if (pxOperatingFIFO->pxBlockUsed == pxOperatingFIFO->pxBlockUnused)
+            {
+                return (uint16_t)(usReadNumber);
+            }
         }
 
-        return (ErrorStatus)(SUCCESS);
+        return (uint16_t)(usReadNumber);
     }
 
-    return (ErrorStatus)(ERROR);
+    return (uint16_t)(NULL);
 }
 
 /**
