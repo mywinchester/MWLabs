@@ -1,6 +1,6 @@
 ## MWLabs
 
-[![Build Status](https://img.shields.io/travis/USER/REPO/BRANCH.svg)]()
+[![Build Status](https://img.shields.io/teamcity/codebetter/bt428.svg)]()
 [![License](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 用 C/C++ 编写的用于8位MCU的开放源代码软件库，并且无标准库依赖。
