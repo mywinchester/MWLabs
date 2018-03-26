@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+typedef uint16_t fifo_size_t;
+
 typedef void *FIFOHandle_t;
 
 /**
@@ -16,7 +18,7 @@ typedef void *FIFOHandle_t;
  * 
  FIFOHandle_t FIFO_Initialize(
                                     void *pvFIFOStorageArea,
-                                    uint16_t usFIFOStorageSize
+                                    fifo_size_t usFIFOStorageSize
                                 );
 
  * 使用外部数组及给定大小初始化一个FIFO队列，并返回对应的Handle。
@@ -36,7 +38,7 @@ typedef void *FIFOHandle_t;
  * 
  * 示例:
  * 
-    static unsigned char ucFIFObuffer[n];
+    static size_t ucFIFObuffer[n];
     
     FIFOHandle_t fifo_handle = FIFO_Initialize(&ucFIFObuffer, sizeof(ucFIFObuffer));
     if (fifo_handle != NULL)
@@ -48,7 +50,7 @@ typedef void *FIFOHandle_t;
     }
  * 
  */
-FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, uint16_t usFIFOStorageSize);
+FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, fifo_size_t usFIFOStorageSize);
 
 /**
  * FIFO.h
@@ -66,7 +68,7 @@ FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, uint16_t usFIFOStorageSize
  * 
  * 示例:
  * 
-    static unsigned char ucFIFObuffer[n];
+    static size_t ucFIFObuffer[n];
     
     FIFOHandle_t fifo_handle = FIFO_Initialize(&ucFIFObuffer, sizeof(ucFIFObuffer));
     // ... 完成FIFO队列需要做的工作，不再需要该FIFO队列
@@ -82,7 +84,7 @@ FIFOHandle_t FIFO_Destroy(FIFOHandle_t pxFIFO);
 /**
  * FIFO.h
  * 
- uint16_t FIFO_UsedSpaceSize(
+ fifo_size_t FIFO_UsedSpaceSize(
                                     FIFOHandle_t pxFIFO
                                 );
 
@@ -90,23 +92,23 @@ FIFOHandle_t FIFO_Destroy(FIFOHandle_t pxFIFO);
  * 
  * @param pxFIFO 需要查看已用空间的FIFO队列
  * 
- * @return uint16_t 返回已用空间大小
+ * @return fifo_size_t 返回已用空间大小
  * 
  * 示例:
  * 
-    static unsigned char ucFIFObuffer[n];
+    static size_t ucFIFObuffer[n];
     
     FIFOHandle_t fifo_handle = FIFO_Initialize(&ucFIFObuffer, sizeof(ucFIFObuffer));
     
-    unsigned short fifo_been_used = FIFO_UsedSpaceSize(fifo_handle);
+    fifo_size_t fifo_been_used = FIFO_UsedSpaceSize(fifo_handle);
  * 
  */
-uint16_t FIFO_UsedSpaceSize(FIFOHandle_t pxFIFO);
+fifo_size_t FIFO_UsedSpaceSize(FIFOHandle_t pxFIFO);
 
 /**
  * FIFO.h
  * 
- uint16_t FIFO_UnusedSpaceSize(
+ fifo_size_t FIFO_UnusedSpaceSize(
                                     FIFOHandle_t pxFIFO
                                 );
 
@@ -114,26 +116,26 @@ uint16_t FIFO_UsedSpaceSize(FIFOHandle_t pxFIFO);
  * 
  * @param pxFIFO 需要查看可用空间的FIFO队列
  * 
- * @return uint16_t 返回可用空间大小
+ * @return fifo_size_t 返回可用空间大小
  * 
  * 示例:
  * 
-    static unsigned char ucFIFObuffer[n];
+    static size_t ucFIFObuffer[n];
     
     FIFOHandle_t fifo_handle = FIFO_Initialize(&ucFIFObuffer, sizeof(ucFIFObuffer));
     
-    unsigned short fifo_can_used = FIFO_UsedSpaceSize(fifo_handle);
+    fifo_size_t fifo_can_used = FIFO_UsedSpaceSize(fifo_handle);
  * 
  */
-uint16_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO);
+fifo_size_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO);
 
 /**
  * FIFO.h
  * 
- uint16_t FIFO_Read(
+ fifo_size_t FIFO_Read(
                                     FIFOHandle_t pxFIFO,
                                     void *pvDest,
-                                    uint16_t usSize
+                                    fifo_size_t usSize
                                 );
 
  * 读取FIFO队列中的数据，并将数据出队。要求读取的数据量（usSize）可以比FIFO队列总长度更大，
@@ -149,19 +151,19 @@ uint16_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO);
  * @param usSize 需要读取FIFO队列的数据个数，按字节计数。当FIFO队列中数据被完全读取且未达到
  * usSize约定大小时，仍视作读取成功
  * 
- * @return uint16_t 返回读取数量。在FIFO队列未被完全读出时，返回值将与要求读取的数据量一致。
+ * @return fifo_size_t 返回读取数量。在FIFO队列未被完全读出时，返回值将与要求读取的数据量一致。
  * 在FIFO队列被完全读出时，返回值将小于或等于要求读取的数据量。在没有数据被读出时，返回NULL值
  * 
  * 示例:
  * 
-    static unsigned char ucFIFObuffer[n];
+    static size_t ucFIFObuffer[n];
 
     FIFOHandle_t fifo_handle = FIFO_Initialize(&ucFIFObuffer, sizeof(ucFIFObuffer));
 
     if (FIFO_UsedSpaceSize(fifo_handle) != NULL)
     {
-        unsigned char operating_data[m];
-        unsigned short read_number;
+        size_t operating_data[m];
+        fifo_size_t read_number;
         read_number = FIFO_Read(fifo_handle, &operating_data, sizeof(operating_data));
 
         if (read_number <= sizeof(operating_data))
@@ -179,7 +181,7 @@ uint16_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO);
     }
  * 
  */
-uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize);
+fifo_size_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, fifo_size_t usSize);
 
 /**
  * FIFO.h
@@ -187,7 +189,7 @@ uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize);
  ErrorStatus FIFO_Write(
                                     FIFOHandle_t pxFIFO,
                                     void *pvDest,
-                                    uint16_t usSize
+                                    fifo_size_t usSize
                                 );
 
  * 将规定长度的数据写入至FIFO区
@@ -204,11 +206,11 @@ uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize);
  * 
  * 示例:
  * 
-    static unsigned char ucFIFObuffer[n];
+    static size_t ucFIFObuffer[n];
 
     FIFOHandle_t fifo_handle = FIFO_Initialize(&ucFIFObuffer, sizeof(ucFIFObuffer));
 
-    unsigned char write_data[m];
+    size_t write_data[m];
 
     // write_data incoming
 
@@ -228,7 +230,7 @@ uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize);
     }
  * 
  */
-ErrorStatus FIFO_Write(FIFOHandle_t pxFIFO, const void *pvSrc, uint16_t usSize);
+ErrorStatus FIFO_Write(FIFOHandle_t pxFIFO, const void *pvSrc, fifo_size_t usSize);
 
 #ifdef __cplusplus
 }

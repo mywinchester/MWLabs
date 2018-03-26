@@ -1,6 +1,11 @@
 #ifndef __MWLABS_COMMON_H
 #define __MWLABS_COMMON_H
 
+#ifndef _SIZE_T
+#define _SIZE_T
+typedef unsigned char       size_t;
+#endif
+
 /*!< Signed integer types  */
 typedef signed char         int8_t;
 typedef signed short        int16_t;
@@ -27,7 +32,7 @@ typedef enum { DISABLE = 0, ENABLE = !DISABLE } FunctionalState;
 
 typedef enum { ERROR = 0, SUCCESS = !ERROR } ErrorStatus;
 
-#define NULL                (0)
+#define NULL                ((void *)0)
 #define U8_MAX              (255)
 #define S8_MAX              (127)
 #define S8_MIN              (-128)
