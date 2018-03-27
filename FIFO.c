@@ -10,10 +10,10 @@
 **/
 struct FIFODefinition
 {
-    size_t *pxBlockUnused;         /* !< 指向未使用的块的指针 > */
-    size_t *pxBlockUsed;           /* !< 指向已使用的块的指针 > */
-    fifo_size_t usFreeSizeInByte;  /* !< FIFO队列空闲大小 > */
-    fifo_size_t usTotalSizeInByte; /* !< FIFO队列总大小 > */
+    char *pxBlockUnused;        /* !< 指向未使用的块的指针 > */
+    char *pxBlockUsed;          /* !< 指向已使用的块的指针 > */
+    uint16_t usFreeSizeInByte;  /* !< FIFO队列空闲大小 > */
+    uint16_t usTotalSizeInByte; /* !< FIFO队列总大小 > */
 };
 typedef struct FIFODefinition FIFO_t;
 
@@ -24,16 +24,16 @@ typedef struct FIFODefinition FIFO_t;
  * 功能:        FIFO队列初始化函数
  * 返回值:      (FIFOHandle_t)当前FIFO队列的指针
 **/
-FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, fifo_size_t usFIFOStorageSize)
+FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, uint16_t usFIFOStorageSize)
 {
     if ((pvFIFOStorageArea != NULL) && (usFIFOStorageSize > sizeof(FIFO_t)))
     {
         FIFO_t *pxNewFIFO = (FIFO_t *)pvFIFOStorageArea;
 
-        pxNewFIFO->usTotalSizeInByte = (fifo_size_t)usFIFOStorageSize;
-        pxNewFIFO->usFreeSizeInByte = (fifo_size_t)(usFIFOStorageSize - sizeof(FIFO_t));
+        pxNewFIFO->usTotalSizeInByte = (uint16_t)usFIFOStorageSize;
+        pxNewFIFO->usFreeSizeInByte = (uint16_t)(usFIFOStorageSize - sizeof(FIFO_t));
 
-        pxNewFIFO->pxBlockUsed = pxNewFIFO->pxBlockUnused = (size_t *)((size_t *)pxNewFIFO + sizeof(FIFO_t)); // BUG
+        pxNewFIFO->pxBlockUsed = pxNewFIFO->pxBlockUnused = (char *)((char *)pxNewFIFO + sizeof(FIFO_t));
 
         return (FIFOHandle_t)(pxNewFIFO);
     }
@@ -48,52 +48,51 @@ FIFOHandle_t FIFO_Initialize(void *pvFIFOStorageArea, fifo_size_t usFIFOStorageS
 **/
 FIFOHandle_t FIFO_Destroy(FIFOHandle_t pxFIFO)
 {
-    pxFIFO = NULL;
-    return (FIFOHandle_t)(pxFIFO);
+    return (FIFOHandle_t)(NULL);
 }
 
 /**
  * 函数名:      FIFO_UsedSpaceSize()
  * 功能:        查看FIFO队列已使用的空间大小
- * 返回值:      (fifo_size_t)已使用的空间大小
+ * 返回值:      (uint16_t)已使用的空间大小
 **/
-fifo_size_t FIFO_UsedSpaceSize(FIFOHandle_t pxFIFO)
+uint16_t FIFO_UsedSpaceSize(FIFOHandle_t pxFIFO)
 {
     FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
-    return (fifo_size_t)(pxOperatingFIFO->usTotalSizeInByte - sizeof(FIFO_t) - pxOperatingFIFO->usFreeSizeInByte);
+    return (uint16_t)(pxOperatingFIFO->usTotalSizeInByte - sizeof(FIFO_t) - pxOperatingFIFO->usFreeSizeInByte);
 }
 
 /**
  * 函数名:      FIFO_UnusedSpaceSize()
  * 功能:        查看FIFO队列未使用的空间大小
- * 返回值:      (fifo_size_t)未使用的空间大小
+ * 返回值:      (uint16_t)未使用的空间大小
 **/
-fifo_size_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO)
+uint16_t FIFO_UnusedSpaceSize(FIFOHandle_t pxFIFO)
 {
     FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
-    return (fifo_size_t)(pxOperatingFIFO->usFreeSizeInByte);
+    return (uint16_t)(pxOperatingFIFO->usFreeSizeInByte);
 }
 
 /**
  * 函数名:      FIFO_Read()
  * 功能:        FIFO队列读取
- * 返回值:      (fifo_size_t)读取到的数据字节大小
+ * 返回值:      (uint16_t)读取到的数据字节大小
 **/
-fifo_size_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, fifo_size_t usSize)
+uint16_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, uint16_t usSize)
 {
     if (pxFIFO != NULL)
     {
         FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
-        size_t *pcSRC = (size_t *)pxOperatingFIFO->pxBlockUsed;
-        size_t *pcDEST = (size_t *)pvDest;
+        char *pcSRC = (char *)pxOperatingFIFO->pxBlockUsed;
+        char *pcDEST = (char *)pvDest;
 
-        size_t *pcStartLine = (size_t *)((size_t *)pxOperatingFIFO + sizeof(FIFO_t));
-        size_t *pcEndLine = (size_t *)((size_t *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
+        char *pcStartLine = (char *)((char *)pxOperatingFIFO + sizeof(FIFO_t));
+        char *pcEndLine = (char *)((char *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
-        fifo_size_t usReadNumber = 0;
+        uint16_t usReadNumber = 0;
 
         pxOperatingFIFO->usFreeSizeInByte += usSize;
 
@@ -111,15 +110,15 @@ fifo_size_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, fifo_size_t usSize)
             if (pcSRC == pxOperatingFIFO->pxBlockUnused)
             {
                 pxOperatingFIFO->pxBlockUsed = pcSRC;
-                return (fifo_size_t)(usReadNumber);
+                return (uint16_t)(usReadNumber);
             }
         }
         pxOperatingFIFO->pxBlockUsed = pcSRC;
 
-        return (fifo_size_t)(usReadNumber);
+        return (uint16_t)(usReadNumber);
     }
 
-    return (fifo_size_t)(NULL);
+    return (uint16_t)(NULL);
 }
 
 /**
@@ -127,17 +126,17 @@ fifo_size_t FIFO_Read(FIFOHandle_t pxFIFO, void *pvDest, fifo_size_t usSize)
  * 功能:        FIFO队列写入
  * 返回值:      (ErrorStatus)错误类型值
 **/
-ErrorStatus FIFO_Write(FIFOHandle_t pxFIFO, const void *pvSrc, fifo_size_t usSize)
+ErrorStatus FIFO_Write(FIFOHandle_t pxFIFO, const void *pvSrc, uint16_t usSize)
 {
     if (pxFIFO != NULL)
     {
         FIFO_t *pxOperatingFIFO = (FIFO_t *)pxFIFO;
 
-        size_t *pcSRC = (size_t *)pvSrc;
-        size_t *pcDEST = (size_t *)pxOperatingFIFO->pxBlockUnused;
+        char *pcSRC = (char *)pvSrc;
+        char *pcDEST = (char *)pxOperatingFIFO->pxBlockUnused;
 
-        size_t *pcStartLine = (size_t *)((size_t *)pxOperatingFIFO + sizeof(FIFO_t));
-        size_t *pcEndLine = (size_t *)((size_t *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
+        char *pcStartLine = (char *)((char *)pxOperatingFIFO + sizeof(FIFO_t));
+        char *pcEndLine = (char *)((char *)pxOperatingFIFO + pxOperatingFIFO->usTotalSizeInByte);
 
         if (usSize <= pxOperatingFIFO->usFreeSizeInByte)
         {
